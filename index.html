@@ -31,12 +31,31 @@ async function fetchVotes() {
   const res = await fetch('/api/getVotes');
   const data = await res.json();
 
-  document.getElementById('foodResults').innerText =
-    `Pizza: ${data.pizza} | Burger: ${data.burger}`;
+  const foodTotal = data.pizza + data.burger;
+  const sportTotal = data.running + data.biking;
 
-  document.getElementById('sportResults').innerText =
-    `Running: ${data.running} | Biking: ${data.biking}`;
+  function createBar(label, value, total) {
+    const percent = total === 0 ? 0 : Math.round((value / total) * 100);
+
+    return `
+      <div class="bar-container">
+        <div class="bar-label">${label} (${value} votes - ${percent}%)</div>
+        <div class="bar-background">
+          <div class="bar" style="width: ${percent}%"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('foodResults').innerHTML =
+    createBar("Pizza", data.pizza, foodTotal) +
+    createBar("Burger", data.burger, foodTotal);
+
+  document.getElementById('sportResults').innerHTML =
+    createBar("Running", data.running, sportTotal) +
+    createBar("Biking", data.biking, sportTotal);
 }
+
 
 async function voteText() {
   const input = document.getElementById('foodInput').value.toLowerCase();
