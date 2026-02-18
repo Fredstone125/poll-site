@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Polls</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Simple Polls</h1>
+
+  <!-- Text Poll -->
+  <div class="poll">
+    <h2>Pizza or Burger?</h2>
+    <input type="text" id="foodInput" placeholder="Type pizza or burger">
+    <button onclick="voteText()">Vote</button>
+    <p id="foodResults"></p>
+  </div>
+
+  <!-- Button Poll -->
+  <div class="poll">
+    <h2>Running or Biking?</h2>
+    <button onclick="voteChoice('running')">Running</button>
+    <button onclick="voteChoice('biking')">Biking</button>
+    <p id="sportResults"></p>
+  </div>
+</div>
+
+<script>
+async function fetchVotes() {
+  const res = await fetch('/api/getVotes');
+  const data = await res.json();
+
+  document.getElementById('foodResults').innerText =
+    `Pizza: ${data.pizza} | Burger: ${data.burger}`;
+
+  document.getElementById('sportResults').innerText =
+    `Running: ${data.running} | Biking: ${data.biking}`;
+}
+
+async function voteText() {
+  const input = document.getElementById('foodInput').value.toLowerCase();
+
+  if (input !== "pizza" && input !== "burger") {
+    alert("Type pizza or burger only.");
+    return;
+  }
+
+  await fetch('/api/vote', {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ option: input })
+  });
+
+  fetchVotes();
+}
+
+async function voteChoice(option) {
+  await fetch('/api/vote', {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ option })
+  });
+
+  fetchVotes();
+}
+
+fetchVotes();
+</script>
+
+</body>
+</html>
