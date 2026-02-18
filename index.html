@@ -41,10 +41,32 @@ async function fetchVotes() {
   const res = await fetch('/api/getVotes');
   const data = await res.json();
 
-  // Filter by category
+  // Separate categories
   const foodFixed = data.filter(item => item.category === "food_fixed");
   const sportFixed = data.filter(item => item.category === "sport_fixed");
   const dynamicFood = data.filter(item => item.category === "dynamic_food");
+
+  function renderBars(items, elementId) {
+    const total = items.reduce((sum, item) => sum + item.votes, 0);
+    let html = "";
+
+    items.forEach(item => {
+      const percent = total === 0 ? 0 : Math.round((item.votes / total) * 100);
+
+      html += `
+        <div class="bar-container">
+          <div class="bar-label">
+            ${item.name} (${item.votes} votes - ${percent}%)
+          </div>
+          <div class="bar-background">
+            <div class="bar" style="width: ${percent}%"></div>
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById(elementId).innerHTML = html;
+  }
 
   function renderList(items, elementId) {
     let html = "";
@@ -54,8 +76,8 @@ async function fetchVotes() {
     document.getElementById(elementId).innerHTML = html;
   }
 
-  renderList(foodFixed, "foodResults");
-  renderList(sportFixed, "sportResults");
+  renderBars(foodFixed, "foodResults");
+  renderBars(sportFixed, "sportResults");
   renderList(dynamicFood, "dynamicResults");
 }
 
@@ -111,7 +133,6 @@ async function voteDynamic() {
   fetchVotes();
 }
 
-// Load votes on page load
 fetchVotes();
 
 </script>
