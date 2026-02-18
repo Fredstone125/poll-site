@@ -37,3 +37,29 @@ input {
   border-radius: 5px;
   border: 1px solid #ccc;
 }
+.results {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.bar-container {
+  margin: 10px 0;
+}
+
+.bar-label {
+  font-weight: bold;
+}
+
+.bar {
+  height: 20px;
+  background-color: #3b82f6;
+  border-radius: 5px;
+  margin-top: 5px;
+  transition: width 0.4s ease;
+}
+
+.bar-background {
+  background-color: #e5e7eb;
+  border-radius: 5px;
+  width: 100%;
+}
