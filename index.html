@@ -36,10 +36,12 @@
 </div>
 
 <script>
+
 async function fetchVotes() {
   const res = await fetch('/api/getVotes');
   const data = await res.json();
 
+  // Filter by category
   const foodFixed = data.filter(item => item.category === "food_fixed");
   const sportFixed = data.filter(item => item.category === "sport_fixed");
   const dynamicFood = data.filter(item => item.category === "dynamic_food");
@@ -57,18 +59,8 @@ async function fetchVotes() {
   renderList(dynamicFood, "dynamicResults");
 }
 
-  document.getElementById('foodResults').innerHTML =
-    createBar("Pizza", data.pizza, foodTotal) +
-    createBar("Burger", data.burger, foodTotal);
-
-  document.getElementById('sportResults').innerHTML =
-    createBar("Running", data.running, sportTotal) +
-    createBar("Biking", data.biking, sportTotal);
-}
-
-
 async function voteText() {
-  const input = document.getElementById('foodInput').value.toLowerCase();
+  const input = document.getElementById('foodInput').value.toLowerCase().trim();
 
   if (input !== "pizza" && input !== "burger") {
     alert("Type pizza or burger only.");
@@ -78,9 +70,13 @@ async function voteText() {
   await fetch('/api/vote', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ option: input })
+    body: JSON.stringify({
+      option: input,
+      category: "food_fixed"
+    })
   });
 
+  document.getElementById('foodInput').value = "";
   fetchVotes();
 }
 
@@ -88,16 +84,19 @@ async function voteChoice(option) {
   await fetch('/api/vote', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ option })
+    body: JSON.stringify({
+      option,
+      category: "sport_fixed"
+    })
   });
 
   fetchVotes();
 }
 
 async function voteDynamic() {
-  const value = document.getElementById('dynamicFood').value;
+  const value = document.getElementById('dynamicFood').value.trim();
 
-  if (!value.trim()) return;
+  if (!value) return;
 
   await fetch('/api/vote', {
     method: "POST",
@@ -108,8 +107,12 @@ async function voteDynamic() {
     })
   });
 
+  document.getElementById('dynamicFood').value = "";
   fetchVotes();
 }
+
+// Load votes on page load
+fetchVotes();
 
 </script>
 
