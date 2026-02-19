@@ -6,90 +6,104 @@
 </head>
 <body style="text-align:center; font-family: Arial;">
 
-    <h1>Reaction Time Test</h1>
+<h1>Reaction Time Test</h1>
 
-    <button id="startBtn">Start</button>
+<button id="startBtn">Start</button>
 
-    <div id="box" 
-         style="
-            width:200px;
-            height:200px;
-            background:red;
-            margin:40px auto;
-            cursor:pointer;
-         ">
-    </div>
+<div id="box" 
+     style="width:200px;height:200px;background:red;margin:40px auto;cursor:pointer;">
+</div>
 
-    <h2 id="waitDisplay"></h2>
-    <h2 id="timeDisplay"></h2>
+<h2 id="waitDisplay"></h2>
+<h2 id="timeDisplay"></h2>
 
+<button id="resetBtn" style="display:none;">Play Again</button>
+<button id="saveBtn" style="display:none;">Save to Leaderboard</button>
 
-    <button id="resetBtn" style="display:none;">Play Again</button>
+<hr style="margin:40px 0;">
 
-    <script>
-        const startBtn = document.getElementById("startBtn");
-        const box = document.getElementById("box");
-        const timeDisplay = document.getElementById("timeDisplay");
-        const resetBtn = document.getElementById("resetBtn");
+<h2>Leaderboard</h2>
+<div id="leaderboard"></div>
 
-        let startTime;
-        let waitStartTime;
-        let timeout;
-        let timerInterval;
-        let waitInterval;
+<script>
+const startBtn = document.getElementById("startBtn");
+const box = document.getElementById("box");
+const timeDisplay = document.getElementById("timeDisplay");
+const resetBtn = document.getElementById("resetBtn");
+const saveBtn = document.getElementById("saveBtn");
+const leaderboardDiv = document.getElementById("leaderboard");
 
+let startTime;
+let timeout;
+let finalTime = null;
 
-        function resetGame() {
-            box.style.background = "red";
-            timeDisplay.textContent = "";
-            startBtn.style.display = "inline-block";
-            resetBtn.style.display = "none";
-            clearInterval(waitInterval);
-            waitDisplay.textContent = "";
-        }
+function resetGame() {
+    box.style.background = "red";
+    timeDisplay.textContent = "";
+    startBtn.style.display = "inline-block";
+    resetBtn.style.display = "none";
+    saveBtn.style.display = "none";
+}
 
-        startBtn.addEventListener("click", () => {
-            startBtn.style.display = "none";
+startBtn.addEventListener("click", () => {
+    startBtn.style.display = "none";
 
-            waitStartTime = performance.now();
+    const randomDelay = Math.random() * 3000 + 1000;
 
-            waitInterval = setInterval(() => {
-                const currentTime = performance.now();
-                const waitTime = currentTime - waitStartTime;
-                waitDisplay.textContent = 
-                    "Wait Time: " + (waitTime / 1000).toFixed(3) + " seconds";
-            }, 10);
+    timeout = setTimeout(() => {
+        box.style.background = "green";
+        startTime = performance.now();
+    }, randomDelay);
+});
 
+box.addEventListener("click", () => {
+    if (box.style.background === "green") {
+        const reactionTime = performance.now() - startTime;
+        finalTime = parseFloat((reactionTime / 1000).toFixed(3));
+        timeDisplay.textContent = finalTime + " seconds";
+        resetBtn.style.display = "inline-block";
+        saveBtn.style.display = "inline-block";
+        box.style.background = "red";
+    }
+});
 
-            const randomDelay = Math.random() * 3000 + 1000; // 1–7 seconds
+resetBtn.addEventListener("click", resetGame);
 
-            timeout = setTimeout(() => {
-                box.style.background = "green";
-            
-                clearInterval(waitInterval);
-            
-                startTime = performance.now();
+saveBtn.addEventListener("click", async () => {
+    if (!finalTime) return;
 
+    const name = prompt("Enter your name:");
 
-                timerInterval = setInterval(() => {
-                    const currentTime = performance.now();
-                    const reactionTime = currentTime - startTime;
-                    timeDisplay.textContent = 
-                        (reactionTime / 1000).toFixed(3) + " seconds";
-                }, 10);
+    if (!name) return;
 
-            }, randomDelay);
-        });
+    await fetch('/api/saveReaction', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name: name.trim(),
+            time: finalTime
+        })
+    });
 
-        box.addEventListener("click", () => {
-            if (box.style.background === "green") {
-                clearInterval(timerInterval);
-                resetBtn.style.display = "inline-block";
-            }
-        });
+    loadLeaderboard();
+    saveBtn.style.display = "none";
+});
 
-        resetBtn.addEventListener("click", resetGame);
-    </script>
+async function loadLeaderboard() {
+    const res = await fetch('/api/getLeaderboard');
+    const data = await res.json();
+
+    let html = "<ol>";
+    data.forEach(player => {
+        html += `<li>${player.name} — ${player.time} sec</li>`;
+    });
+    html += "</ol>";
+
+    leaderboardDiv.innerHTML = html;
+}
+
+loadLeaderboard();
+</script>
 
 </body>
 </html>
