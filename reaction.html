@@ -72,7 +72,11 @@ resetBtn.addEventListener("click", resetGame);
 saveBtn.addEventListener("click", async () => {
     if (!finalTime) return;
 
-    const name = prompt("Enter your name:");
+    let name = prompt("Enter your name:");
+
+    if (!name) return;
+    
+    name = name.trim().toLowerCase();
 
     if (!name) return;
 
