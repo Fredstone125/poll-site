@@ -3,18 +3,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { name, time } = req.body;
+  let { name, time } = req.body;
 
   if (!name || !time) {
     return res.status(400).json({ error: "Missing data" });
   }
 
+  // Force lowercase and trim spaces
+  name = name.trim().toLowerCase();
+
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  // Check if user already exists
+  // Case-insensitive check using ilike
   const checkRes = await fetch(
-    `${supabaseUrl}/rest/v1/reaction_scores?name=eq.${name}`,
+    `${supabaseUrl}/rest/v1/reaction_scores?name=ilike.${name}`,
     {
       headers: {
         apikey: supabaseKey,
@@ -31,7 +34,7 @@ export default async function handler(req, res) {
     // Only update if new time is faster
     if (time < currentBest) {
       await fetch(
-        `${supabaseUrl}/rest/v1/reaction_scores?name=eq.${name}`,
+        `${supabaseUrl}/rest/v1/reaction_scores?name=ilike.${name}`,
         {
           method: "PATCH",
           headers: {
