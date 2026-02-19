@@ -63,3 +63,26 @@ input {
   border-radius: 5px;
   width: 100%;
 }
+
+/* Back to Home Button */
+
+.button-container {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 40px;
+}
+
+.home-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    font-size: 18px;
+    text-decoration: none;
+    color: white;
+    background-color: #28a745;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.home-btn:hover {
+    background-color: #1e7e34;
+}
