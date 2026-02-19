@@ -20,7 +20,9 @@
          ">
     </div>
 
+    <h2 id="waitDisplay"></h2>
     <h2 id="timeDisplay"></h2>
+
 
     <button id="resetBtn" style="display:none;">Play Again</button>
 
@@ -31,24 +33,43 @@
         const resetBtn = document.getElementById("resetBtn");
 
         let startTime;
+        let waitStartTime;
         let timeout;
         let timerInterval;
+        let waitInterval;
+
 
         function resetGame() {
             box.style.background = "red";
             timeDisplay.textContent = "";
             startBtn.style.display = "inline-block";
             resetBtn.style.display = "none";
+            clearInterval(waitInterval);
+            waitDisplay.textContent = "";
         }
 
         startBtn.addEventListener("click", () => {
             startBtn.style.display = "none";
 
+            waitStartTime = performance.now();
+
+            waitInterval = setInterval(() => {
+                const currentTime = performance.now();
+                const waitTime = currentTime - waitStartTime;
+                waitDisplay.textContent = 
+                    "Wait Time: " + (waitTime / 1000).toFixed(3) + " seconds";
+            }, 10);
+
+
             const randomDelay = Math.random() * 6000 + 1000; // 1–7 seconds
 
             timeout = setTimeout(() => {
                 box.style.background = "green";
+            
+                clearInterval(waitInterval);
+            
                 startTime = performance.now();
+
 
                 timerInterval = setInterval(() => {
                     const currentTime = performance.now();
