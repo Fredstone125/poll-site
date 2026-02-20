@@ -81,7 +81,6 @@ box.addEventListener("click", () => {
         const reactionTime = performance.now() - startTime;
         finalTime = parseFloat((reactionTime / 1000).toFixed(3));
         timeDisplay.textContent = finalTime + " seconds";
-        messageDisplay.textContent = "Nice reaction!";
         resetBtn.style.display = "inline-block";
         saveBtn.style.display = "inline-block";
         box.style.background = "red";
