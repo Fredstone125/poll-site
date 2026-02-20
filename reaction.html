@@ -14,7 +14,7 @@
      style="width:200px;height:200px;background:red;margin:40px auto;cursor:pointer;">
 </div>
 
-<h2 id="waitDisplay"></h2>
+<h2 id="messageDisplay"></h2>
 <h2 id="timeDisplay"></h2>
 
 <button id="resetBtn" style="display:none;">Play Again</button>
@@ -29,6 +29,7 @@
 const startBtn = document.getElementById("startBtn");
 const box = document.getElementById("box");
 const timeDisplay = document.getElementById("timeDisplay");
+const messageDisplay = document.getElementById("messageDisplay");
 const resetBtn = document.getElementById("resetBtn");
 const saveBtn = document.getElementById("saveBtn");
 const leaderboardDiv = document.getElementById("leaderboard");
@@ -36,34 +37,55 @@ const leaderboardDiv = document.getElementById("leaderboard");
 let startTime;
 let timeout;
 let finalTime = null;
+let gameState = "idle"; 
+// idle → waiting → ready → finished
 
 function resetGame() {
     box.style.background = "red";
     timeDisplay.textContent = "";
+    messageDisplay.textContent = "";
     startBtn.style.display = "inline-block";
     resetBtn.style.display = "none";
     saveBtn.style.display = "none";
+    gameState = "idle";
 }
 
 startBtn.addEventListener("click", () => {
     startBtn.style.display = "none";
+    messageDisplay.textContent = "Wait for green...";
+    gameState = "waiting";
 
     const randomDelay = Math.random() * 3000 + 1000;
 
     timeout = setTimeout(() => {
         box.style.background = "green";
+        messageDisplay.textContent = "CLICK!";
         startTime = performance.now();
+        gameState = "ready";
     }, randomDelay);
 });
 
 box.addEventListener("click", () => {
-    if (box.style.background === "green") {
+
+    // If clicked too early
+    if (gameState === "waiting") {
+        clearTimeout(timeout);
+        messageDisplay.textContent = "Too Early! You failed.";
+        resetBtn.style.display = "inline-block";
+        gameState = "finished";
+        return;
+    }
+
+    // If clicked correctly
+    if (gameState === "ready") {
         const reactionTime = performance.now() - startTime;
         finalTime = parseFloat((reactionTime / 1000).toFixed(3));
         timeDisplay.textContent = finalTime + " seconds";
+        messageDisplay.textContent = "Nice reaction!";
         resetBtn.style.display = "inline-block";
         saveBtn.style.display = "inline-block";
         box.style.background = "red";
+        gameState = "finished";
     }
 });
 
@@ -73,18 +95,16 @@ saveBtn.addEventListener("click", async () => {
     if (!finalTime) return;
 
     let name = prompt("Enter your name:");
-
     if (!name) return;
-    
-    name = name.trim().toLowerCase();
 
+    name = name.trim().toLowerCase();
     if (!name) return;
 
     await fetch('/api/saveReaction', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            name: name.trim(),
+            name,
             time: finalTime
         })
     });
